@@ -9,12 +9,12 @@
 
 // Узел списка: одна цифра и указатель на следующий узел
 struct DigitNode {
-    int digit;              // 0…9
+    int digit;              // 0...9
     DigitNode* next = nullptr;
     explicit DigitNode(int d) : digit(d) {}
 };
 
-// «Свой» список цифр (LSB-порядок)
+// Свой список цифр (LSB-порядок)
 class DigitList {
 public:
     DigitList() = default;
@@ -70,7 +70,7 @@ void trimZeros(DigitList& num) {
         num.pop_back();
 }
 
-// Строка → DigitList   (игнорируем не-цифры)
+// Строка -> DigitList   (игнорируем не-цифры)
 DigitList toDigits(const std::string& s) {
     DigitList num;
     for (auto it = s.rbegin(); it != s.rend(); ++it)
@@ -80,11 +80,11 @@ DigitList toDigits(const std::string& s) {
     return num;
 }
 
-// DigitList → строка
+// DigitList -> строка
 std::string toString(const DigitList& num) {
     std::string out;
     char buf[2]{};
-    // проходим «задом наперёд»: сначала нужен tail
+    // проходим задом наперёд: сначала нужен tail
     std::string tmp;
     for (DigitNode* p = num.begin(); p; p = p->next)
         tmp.push_back(char('0' + p->digit));
@@ -120,10 +120,11 @@ void add(DigitList& a, const DigitList& b) {
         result.push_back(sum % 10);
         carry = sum / 10;
     }
-    a = std::move(result);          // заменить результатом
+    a = std::move(result); 
+    trimZeros(a);         // заменить результатом
 }
 
-// a = a - b   (|a| ≥ |b|, оба ≥ 0)
+// a = a - b   (|a| >= |b|, оба >= 0)
 void sub(DigitList& a, const DigitList& b) {
     DigitNode* pa = a.begin();
     DigitNode* pb = b.begin();
@@ -151,26 +152,46 @@ int main() {
     char op;
     if (!(std::cin >> s1 >> op >> s2)) return 0;
 
+    // вычленяем знаки
+    bool neg1 = false, neg2 = false;
+    if (s1[0]=='+'||s1[0]=='-') { neg1 = (s1[0]=='-'); s1.erase(0,1); }
+    if (s2[0]=='+'||s2[0]=='-') { neg2 = (s2[0]=='-'); s2.erase(0,1); }
+
+    // конвертируем в списки цифр
     DigitList a = toDigits(s1);
     DigitList b = toDigits(s2);
 
-    if (op == '+') {
-        add(a, b);
-        std::cout << "Сумма = " << toString(a) << '\n';
+    // для операции '-' инвертируем знак второго
+    if (op == '-') neg2 = !neg2;
+    if (op!='+' && op!='-') {
+        std::cerr << "Поддерживаются только + и -\n";
+        return 1;
     }
-    else if (op == '-') {
+
+    // общий префикс вывода
+    const char* label = (op=='+' ? "Сумма = " : "Разность = ");
+
+    if (neg1 == neg2) {
+        // одинаковые знаки -> сложение модулей
+        add(a, b);
+        std::cout << label;
+        if (neg1) std::cout << '-';
+        std::cout << toString(a) << '\n';
+    } else {
+        // разные знаки → вычитание модулей
         int cmp = absCompare(a, b);
         if (cmp == 0) {
-            std::cout << "Разность = 0\n";
-        } else if (cmp > 0) {        // |a| > |b|
+            std::cout << label << "0\n";
+        } else if (cmp > 0) {
             sub(a, b);
-            std::cout << "Разность = " << toString(a) << '\n';
-        } else {                    // результат отрицательный
+            std::cout << label;
+            if (neg1) std::cout << '-';
+            std::cout << toString(a) << '\n';
+        } else {
             sub(b, a);
-            std::cout << "Разность = -" << toString(b) << '\n';
+            std::cout << label;
+            if (neg2) std::cout << '-';
+            std::cout << toString(b) << '\n';
         }
-    }
-    else {
-        std::cerr << "Поддерживаются только + и -\n";
     }
 }
