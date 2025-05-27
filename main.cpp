@@ -96,7 +96,7 @@ std::string toString(const DigitList& num) {
 int absCompare(const DigitList& a, const DigitList& b) {
     if (a.size() != b.size()) return a.size() < b.size() ? -1 : 1;
 
-    /* чтобы сравнить «слева направо», перегоняем цифры во временный буфер */
+    /* чтобы сравнить слева направо, перегоняем цифры во временный буфер */
     std::string sa = toString(a), sb = toString(b);
     if (sa == sb) return 0;
     return sa < sb ? -1 : 1;
