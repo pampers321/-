@@ -178,7 +178,7 @@ int main() {
         if (neg1) std::cout << '-';
         std::cout << toString(a) << '\n';
     } else {
-        // разные знаки → вычитание модулей
+        // разные знаки -> вычитание модулей
         int cmp = absCompare(a, b);
         if (cmp == 0) {
             std::cout << label << "0\n";
